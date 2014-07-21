@@ -9,16 +9,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
-
-import java.net.URI;
-import java.net.URL;
 import java.util.UUID;
 
 public class MyActivity extends Activity {
     private PaintView paintView;
+    private PaintClient paintClient;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +31,11 @@ public class MyActivity extends Activity {
     }
 
     @Override
+    protected void onDestroy() {
+        paintClient.disconnectSocket();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -49,7 +49,7 @@ public class MyActivity extends Activity {
 
     public void buttonClearClick(View view) {
         Log.i("INFO", "Clear button clicked");
-
+        paintClient.emitClear();
         paintView.clearCanvas();
     }
 
@@ -89,36 +89,7 @@ public class MyActivity extends Activity {
 
     protected void testSocketIoClient() {
         try {
-            String serverUrlString = "http://warm-fortress-2906.herokuapp.com";
-            URL serverUrl = new URL(serverUrlString);
-            URI uri = new URI(
-                    serverUrl.getProtocol(),
-                    serverUrl.getHost(),
-                    serverUrl.getQuery(),
-                    null
-            );
-            final Socket socket = IO.socket(uri);
-
-            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    socket.emit("debug", "Hello from Android");
-                    Log.d("SENT REQ TO SERVER", "Hello from Android");
-                }
-            }).on("debug", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.d("SERVER RESPONSE", args[0].toString());
-                    socket.disconnect();
-                }
-            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.d("DISCONNECT", "Disconnected from server");
-                }
-            });
-
-            socket.connect();
+            paintClient = new PaintClient();
         } catch(Exception exception) {
             Log.e("EXCEPTION", exception.getMessage());
         }
