@@ -1,6 +1,7 @@
 package me.taywils.myapplication;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -9,6 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class MyActivity extends Activity {
@@ -22,6 +25,8 @@ public class MyActivity extends Activity {
         this.paintView = (PaintView)findViewById(R.id.activity_my_view_whiteboard);
         this.testSocketIoClient();
         this.paintView.setPaintClient(paintClient);
+
+        waitForSocketIoToConnect(30000);
     }
 
     @Override
@@ -96,5 +101,23 @@ public class MyActivity extends Activity {
         } catch(Exception exception) {
             Log.e("EXCEPTION", exception.getMessage());
         }
+    }
+
+    protected void waitForSocketIoToConnect(Integer milliseconds) {
+        final ProgressDialog dialog = new ProgressDialog(MyActivity.this);
+        dialog.setTitle("Please Wait");
+        dialog.setMessage("Establishing connection to server...");
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
+        dialog.show();
+
+        long delayInMillis = milliseconds;
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                dialog.dismiss();
+            }
+        }, delayInMillis);
     }
 }
