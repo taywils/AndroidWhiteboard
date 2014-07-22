@@ -21,6 +21,7 @@ public class MyActivity extends Activity {
 
         this.paintView = (PaintView)findViewById(R.id.activity_my_view_whiteboard);
         this.testSocketIoClient();
+        this.paintView.setPaintClient(paintClient);
     }
 
     @Override

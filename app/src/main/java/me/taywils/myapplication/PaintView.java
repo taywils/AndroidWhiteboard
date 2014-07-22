@@ -17,15 +17,26 @@ public class PaintView extends View {
     private Canvas canvas;
     private Path penPath;
     private Paint penPaint;
+    private Paint otherPaint;
     private Paint canvasPaint;
+    private PaintClient paintClient;
 
     public PaintView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         setupPainting();
     }
 
+    public void setPaintClient(PaintClient paintClient) {
+        this.paintClient = paintClient;
+    }
+
     public void clearCanvas() {
         this.canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        invalidate();
+    }
+
+    public void paintPoint(Integer x, Integer y) {
+        this.canvas.drawPoint(x, y, this.otherPaint);
         invalidate();
     }
 
@@ -42,6 +53,14 @@ public class PaintView extends View {
         this.penPaint.setStyle(Paint.Style.STROKE);
         this.penPaint.setStrokeJoin(Paint.Join.ROUND);
         this.penPaint.setStrokeCap(Paint.Cap.ROUND);
+
+        this.otherPaint = new Paint();
+        this.otherPaint.setColor(Color.GREEN);
+        this.otherPaint.setAntiAlias(true);
+        this.otherPaint.setStrokeWidth(20);
+        this.otherPaint.setStyle(Paint.Style.STROKE);
+        this.otherPaint.setStrokeJoin(Paint.Join.ROUND);
+        this.otherPaint.setStrokeCap(Paint.Cap.ROUND);
 
         this.canvasPaint = new Paint(Paint.DITHER_FLAG);
     }
@@ -68,10 +87,12 @@ public class PaintView extends View {
         switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 this.penPath.moveTo(touchPoint.x, touchPoint.y);
+                this.paintClient.emitPaint(Math.round(touchPoint.x), Math.round(touchPoint.y));
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 this.penPath.lineTo(touchPoint.x, touchPoint.y);
+                this.paintClient.emitPaint(Math.round(touchPoint.x), Math.round(touchPoint.y));
                 break;
 
             case MotionEvent.ACTION_UP:

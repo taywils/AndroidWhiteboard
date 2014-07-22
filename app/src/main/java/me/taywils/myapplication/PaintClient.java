@@ -1,6 +1,7 @@
 package me.taywils.myapplication;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -20,7 +21,7 @@ public class PaintClient {
     private final int BOARD_COLS = 500;
     private Socket socket;
     private boolean board[][] = new boolean[BOARD_ROWS][BOARD_COLS];
-    private PaintView pv;
+    private PaintView paintView;
     private Context context;
 
     public PaintClient() {
@@ -32,7 +33,7 @@ public class PaintClient {
     }
 
     public void setPaintView(PaintView paintView) {
-        pv = paintView;
+        this.paintView = paintView;
     }
 
     public void initSocket() {
@@ -69,22 +70,71 @@ public class PaintClient {
                 @Override
                 public void call(Object... args) {
                     Log.d("onClear", args[0].toString());
-                    pv.clearCanvas();
+                    Handler mainHandler = new Handler(context.getMainLooper());
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            paintView.clearCanvas();
+                        }
+                    };
+                    mainHandler.post(myRunnable);
                 }
             });
 
             socket.on("newClient", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    Log.d("onNewClient", args[0].toString());
-                    JSONArray jsonBoard = (JSONArray)args[0];
+                    try {
+                        Log.d("onNewClient", "PaintClient onNewClient");
+                        final JSONArray jsonBoard = (JSONArray) args[0];
+
+                        Handler mainHandler = new Handler(context.getMainLooper());
+                        Runnable myRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    for (int row = 0; row < BOARD_ROWS; ++row) {
+                                        for (int col = 0; col < BOARD_COLS; ++col) {
+                                            JSONArray jsonBoardRow = (JSONArray) jsonBoard.get(row);
+                                            Boolean boolVal = (Boolean) jsonBoardRow.get(col);
+                                            if(boolVal) {
+                                                paintView.paintPoint(row, col);
+                                            }
+                                        }
+                                    }
+                                } catch(Exception exception) {
+                                    Log.e("EXCEPTION", exception.getMessage());
+                                }
+                            }
+                        };
+                        mainHandler.post(myRunnable);
+                    } catch(Exception exception) {
+                        Log.e("EXCEPTION", exception.getMessage());
+                    }
                 }
             });
 
             socket.on("paint", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    Log.d("onPaint", args[0].toString());
+                    try {
+                        Log.d("onPaint", args[0].toString());
+
+                        JSONObject paintCoordObj = (JSONObject) args[0];
+                        final Integer x = paintCoordObj.getInt("x");
+                        final Integer y = paintCoordObj.getInt("y");
+
+                        Handler mainHandler = new Handler(context.getMainLooper());
+                        Runnable myRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                paintView.paintPoint(x, y);
+                            }
+                        };
+                        mainHandler.post(myRunnable);
+                    } catch(Exception exception) {
+                        Log.e("EXCEPTION", exception.getMessage());
+                    }
                 }
             });
 
