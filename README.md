@@ -9,6 +9,12 @@ Information
 - This application at minimum supports SDK Version 19 
 - [http://developer.android.com/guide/topics/manifest/uses-sdk-element.html](http://developer.android.com/guide/topics/manifest/uses-sdk-element.html)
 
+Features
+--------
+
+- Tap button to clear all whiteboard scribbles
+- Tap button to save snapshot of whiteboard to Gallery
+
 Recommended Setup
 -----------------
 
