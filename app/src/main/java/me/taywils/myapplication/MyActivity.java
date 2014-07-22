@@ -19,8 +19,8 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        this.testSocketIoClient();
         this.paintView = (PaintView)findViewById(R.id.activity_my_view_whiteboard);
+        this.testSocketIoClient();
     }
 
     @Override
@@ -90,6 +90,8 @@ public class MyActivity extends Activity {
     protected void testSocketIoClient() {
         try {
             paintClient = new PaintClient();
+            paintClient.setPaintView(paintView);
+            paintClient.setContext(this);
         } catch(Exception exception) {
             Log.e("EXCEPTION", exception.getMessage());
         }

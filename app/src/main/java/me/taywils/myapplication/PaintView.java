@@ -12,8 +12,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 
-import java.util.Random;
-
 public class PaintView extends View {
     private Bitmap bitmap;
     private Canvas canvas;

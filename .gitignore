@@ -1,4 +1,9 @@
+# Intellij
+.idea/
+*.iml
+*.iws
 .gradle
+
 /local.properties
 /.idea/workspace.xml
 .DS_Store
@@ -36,8 +41,3 @@ Thumbs.db
 #.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
 .gradle
 build/
-
-# Intellij
-.idea/
-*.iml
-*.iws

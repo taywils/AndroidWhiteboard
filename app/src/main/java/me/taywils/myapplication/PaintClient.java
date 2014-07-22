@@ -1,11 +1,13 @@
 package me.taywils.myapplication;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -18,9 +20,19 @@ public class PaintClient {
     private final int BOARD_COLS = 500;
     private Socket socket;
     private boolean board[][] = new boolean[BOARD_ROWS][BOARD_COLS];
+    private PaintView pv;
+    private Context context;
 
     public PaintClient() {
         initSocket();
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setPaintView(PaintView paintView) {
+        pv = paintView;
     }
 
     public void initSocket() {
@@ -42,28 +54,44 @@ public class PaintClient {
                 @Override
                 public void call(Object... args) {
                     emitDebug();
-                    Log.d("CONNECTED TO SERVER", "Sending debug message");
-                }
-            });
-
-            socket.on("newClient", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.d("SERVER RESPONSE", args[0].toString());
+                    Log.d("onConnect", "Sending debug message");
                 }
             });
 
             socket.on("debug", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    Log.d("SERVER RESPONSE", args[0].toString());
+                    Log.d("onDebug", args[0].toString());
+                }
+            });
+
+            socket.on("clear", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    Log.d("onClear", args[0].toString());
+                    pv.clearCanvas();
+                }
+            });
+
+            socket.on("newClient", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    Log.d("onNewClient", args[0].toString());
+                    JSONArray jsonBoard = (JSONArray)args[0];
+                }
+            });
+
+            socket.on("paint", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    Log.d("onPaint", args[0].toString());
                 }
             });
 
             socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    Log.d("DISCONNECT", "Disconnected from server");
+                    Log.d("onDisconnect", "Disconnected from server");
                 }
             });
             /* END socket_event_handlers */
